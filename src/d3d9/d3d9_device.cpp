@@ -3920,6 +3920,8 @@ namespace dxvk {
     if (unlikely((Flags & (D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE)) == (D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE)))
       Flags &= ~D3DLOCK_DISCARD;
 
+    Flags &= ~D3DLOCK_DISCARD;
+
     auto& desc = *(pResource->Desc());
 
     bool alloced = pResource->CreateBufferSubresource(Subresource);
@@ -4223,6 +4225,9 @@ namespace dxvk {
       });
     } 
     else {
+      Flush();
+      SynchronizeCsThread();
+
       m_converter->ConvertFormat(
         convertFormat,
         image, subresourceLayers,
