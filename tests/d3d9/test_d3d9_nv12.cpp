@@ -186,7 +186,7 @@ public:
 
     m_device->SetVertexDeclaration(m_decl.ptr());
 
-    const uint32_t imageSize = 256;
+    const uint32_t imageSize = 320;
 
     Com<IDirect3DTexture9> texture;
     Com<IDirect3DSurface9> texSurf;
@@ -197,7 +197,21 @@ public:
     status = m_device->CreateOffscreenPlainSurface(imageSize, imageSize, (D3DFORMAT)MAKEFOURCC('N', 'V', '1', '2'), D3DPOOL_DEFAULT, &nv12Surf, nullptr);
     D3DLOCKED_RECT rect;
     nv12Surf->LockRect(&rect, nullptr, 0);
-    std::memcpy(rect.pBits, test_d3d9_nv12_yuv, test_d3d9_nv12_yuv_len);
+    char* dst = (char*)rect.pBits;
+    char* src = (char*)test_d3d9_nv12_yuv;
+    for (uint32_t i = 0; i < imageSize; i++)
+    {
+      std::memcpy(dst, src, imageSize);
+      src += imageSize;
+      dst += rect.Pitch;
+    }
+
+    for (uint32_t i = 0; i < imageSize / 2; i++)
+    {
+      std::memcpy(dst, src, imageSize);
+      src += imageSize;
+      dst += rect.Pitch;
+    }
     nv12Surf->UnlockRect();
     status = m_device->StretchRect(nv12Surf.ptr(), nullptr, texSurf.ptr(), nullptr, D3DTEXF_LINEAR);
     m_device->SetTexture(0, texture.ptr());
